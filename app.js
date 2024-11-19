@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 
 // CORS configuration
 const corsOptions = {
-    origin: ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8080', 'http://127.0.0.1:8889'],
+    origin: ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8080', 'http://127.0.0.1:8889', 'db-mysql-lon1-12964-do-user-18318316-0.i.db.ondigitalocean.com', 'http://db-mysql-lon1-12964-do-user-18318316-0.i.db.ondigitalocean.com', 'https://db-mysql-lon1-12964-do-user-18318316-0.i.db.ondigitalocean.com', 'https://db-mysql-lon1-12964-do-user-18318316-0.i.db.ondigitalocean.com', 'https://db-mysql-lon1-12964-do-user-18318316-0.i.db.ondigitalocean.com', 'http://http://webappapi.com', 'https://http://webappapi.com'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 };
