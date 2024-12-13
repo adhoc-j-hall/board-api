@@ -7,7 +7,7 @@ import bcrypt from 'bcrypt';
 import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import authenticateToken from './authMiddleware.js'; // Adjust the path as necessary
+import authenticateToken from './middleware/authMiddleware.js'; // Adjust the path as necessary
 import ejs from 'ejs';
 
 // Load environment variables from .env file
