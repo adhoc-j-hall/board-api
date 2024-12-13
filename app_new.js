@@ -127,7 +127,6 @@ app.post('/login', loginLimiter, (req, res) => {
     });
 });
 
-
 //user authentication route
 app.get('/user', authenticateToken, async (req, res) => {
     res.json({ user: req.user });
