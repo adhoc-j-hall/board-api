@@ -80,7 +80,7 @@ app.post('/signup', async (req, res) => {
             return res.status(400).send('Username or email address already exists');
         }
         console.error(err);
-        res.status(500).send('Server error');
+        res.status(500).send('Server error ' + err);
     }
 });
 //LOGIN ROUTE
@@ -125,7 +125,7 @@ app.post('/login', loginLimiter, async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server error');
+        res.status(500).send('Server error ' + err);
     }
 });
 // Route to fetch all users
