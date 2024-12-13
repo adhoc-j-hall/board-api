@@ -40,6 +40,7 @@ app.render('email', function (err, html) {
 });
 // Route to handle form submission
 app.post('/signup', async (req, res) => {
+    let connection;
     const { email_address, username, first_name, last_name, password, email_verified } = req.body;
 
     if (!email_address || !username || !password) {
@@ -47,6 +48,7 @@ app.post('/signup', async (req, res) => {
     }
 
     try {
+        connection = await mysql.createConnection(dbConfig);
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
