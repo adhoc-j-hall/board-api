@@ -5,6 +5,7 @@ import cors from 'cors';
 import mysql from 'mysql2/promise'; // Import mysql2 with promise support
 import dotenv from 'dotenv';
 import ejs from 'ejs';
+import bcrypt from 'bcrypt';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -26,21 +27,30 @@ const corsOptions = {
 app.set('view engine', 'ejs');
 app.use(cors(corsOptions));
 
-// MySQL connection configuration
-const dbConfig = {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    port: process.env.DB_PORT,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-};
+// MySQL connection
+let db;
+(async () => {
+    try {
+        db = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
+        });
+        console.log('Connected to database');
+    } catch (err) {
+        console.error('Database connection failed:', err);
+    }
+})();
+
 app.render('email', function (err, html) {
     if (err) console.log(err);
     console.log(html);
 });
+
 // Route to handle form submission
 app.post('/signup', async (req, res) => {
-    let connection;
     const { email_address, username, first_name, last_name, password, email_verified } = req.body;
 
     if (!email_address || !username || !password) {
@@ -48,44 +58,37 @@ app.post('/signup', async (req, res) => {
     }
 
     try {
-        connection = await mysql.createConnection(dbConfig);
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const query = 'INSERT INTO users (email_address, username, first_name, last_name, password, email_verified) VALUES (?, ?, ?, ?, ?, false)';
-        db.query(query, [email_address, username, first_name, last_name, hashedPassword, email_verified], (err, result) => {
-            if (err) {
-                if (err.code === 'ER_DUP_ENTRY') {
-                    return res.status(400).send('Username or email address already exists');
-                }
-                throw err;
-            }
-            res.send('Sign up successful!');
-        });
-    } catch (error) {
-        console.error(error);
+        const [result] = await db.query(query, [email_address, username, first_name, last_name, hashedPassword, email_verified]);
+        
+        res.send('Sign up successful!');
+    } catch (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).send('Username or email address already exists');
+        }
+        console.error(err);
         res.status(500).send('Server error');
     }
 });
+
 // Route to fetch all users
 app.get('/usersFetch', async (req, res) => {
-    let connection;
     try {
-        connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute('SELECT * FROM users');
+        const [rows] = await db.execute('SELECT * FROM users');
         res.json(rows);
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        console.error(err);
         res.status(500).send('Server error');
-    } finally {
-        if (connection) {
-            await connection.end();
-        }
     }
 });
+
 app.get('/', (req, res) => {
     res.render('index'); // Assuming you have an 'index.ejs' file in your views folder
 });
+
 app.listen(port, () => {
     console.log(`Auth server running on http://localhost:${port}`);
 });
