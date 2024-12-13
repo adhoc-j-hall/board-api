@@ -73,7 +73,16 @@ app.post('/signup', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
+// Route to fetch all users
+app.get('/test', async (req, res) => {
+    try {
+        const [rows] = await db.execute('SELECT * FROM users');
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server error');
+    }
+});
 // Route to fetch all users
 app.get('/usersFetch', async (req, res) => {
     try {
