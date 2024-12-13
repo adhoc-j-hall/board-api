@@ -83,39 +83,18 @@ app.post('/signup', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-//POST TO BOARD ROUTE
-app.post('/posts', async (req, res) => {
-    const { user_id, title, content } = req.body;
-
-    if (!title || !content) {
-        return res.status(400).send('Missing required fields.');
-    }
-
-    try {
-        const query = 'INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)';
-        db.query(query, [user_id, title, content], (err, result) => {
-            if (err) {
-                throw err;
-            }
-            res.status(201).send('Post created successfully!');
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Server error.');
-    }
-});
 //LOGIN ROUTE
-app.post('/login', loginLimiter, (req, res) => {
+app.post('/login', loginLimiter, async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
         return res.status(400).send('Missing required fields');
     }
 
-    // Query to find the user by username or email
-    const query = 'SELECT * FROM users WHERE username = ? OR email_address = ?';
-    db.query(query, [username, username], async (err, results) => {
-        if (err) throw err;
+    try {
+        // Query to find the user by username or email
+        const query = 'SELECT * FROM users WHERE username = ? OR email_address = ?';
+        const [results] = await db.query(query, [username, username]);
 
         if (results.length === 0) {
             return res.status(400).send('Invalid username or password');
@@ -130,7 +109,7 @@ app.post('/login', loginLimiter, (req, res) => {
         }
 
         // Generate a JWT token
-        const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         // Authentication successful
         res.json({
@@ -144,7 +123,10 @@ app.post('/login', loginLimiter, (req, res) => {
             },
             token,
         });
-    });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server error');
+    }
 });
 // Route to fetch all users
 app.get('/test', async (req, res) => {
